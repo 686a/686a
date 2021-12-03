@@ -1,0 +1,30 @@
+name: union-heatmap
+on:
+  schedule:
+    - cron: "17 */6 * * *"
+  workflow_dispatch:
+jobs:
+  heatmap:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      # union-heatmap is private for now: check it out with a read-only deploy key and run it as a local action.
+      - uses: actions/checkout@v5
+        with:
+          repository: 686a/union-heatmap
+          ref: master
+          ssh-key: ${{ secrets.UNION_HEATMAP_DEPLOY_KEY }}
+          path: .union-heatmap
+      - uses: ./.union-heatmap
+        with:
+          forgejo-url: https://git.ashz.dev
+          forgejo-user: "686a"
+          forgejo-token: ${{ secrets.FORGEJO_TOKEN }}
+          timezone: Asia/Seoul
+      - uses: crazy-max/ghaction-github-pages@v5
+        with:
+          target_branch: output
+          build_dir: dist
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
